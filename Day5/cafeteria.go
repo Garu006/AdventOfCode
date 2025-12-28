@@ -107,6 +107,16 @@ func countFresh(ids []int64, merged []interval) int {
 	return total
 }
 
+// countCovered loops ranges and sums r.end - r.start + 1 into an int64 total.
+
+func countCovered(merged []interval) int64 {
+	var total int64
+	for _, r:= range merged {
+		total += r.end - r.start + 1
+	}
+	return total
+}
+
 func main() {
 	path := "Day5/input.txt"
 	if len(os.Args) > 1 {
@@ -120,6 +130,8 @@ func main() {
 	}
 
 	merged := mergeIntervals(ranges)
+	covered := countCovered(merged)
 	fresh := countFresh(ids, merged)
 	fmt.Println(fresh)
+	fmt.Println(covered)
 }
