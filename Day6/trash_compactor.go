@@ -100,22 +100,38 @@ func solveSubProblem(lines []string) int { // resolver el subproblema representa
 	var numbers []int // esta variable guarda los numeros encontrados
 	op := "" // esta variable guarda la operacion encontrada
 
-	for _, line := range lines { // recorremos cada linea
-		line = strings.TrimSpace(line) // quitamos espacios en blanco al inicio y al final
-		if line == "" { // si la linea esta vacia, seguimos con la siguiente
-			continue 
-		}
+	width := len(lines[0]) // ando de las lineas
+	height := len(lines) // alto de las lineas
 
-		if line == "+" || line == "*" { // si la linea tiene una operacion
-			op = line // se guarda la operacion
-		}else { // si la linea tiene un numero
-			var n int // esta variable guarda el numero encontrado
-			fmt.Sscanf(line, "%d", &n) // se convierte la linea a numero usando Sscanf
-			numbers = append(numbers, n) // se agrega el numero a la lista de numeros
-		} 
+	// detectar la operacoin en la ultima fila
+	for col := width - 1; col >= 0; col-- { // recorremos cada columna de derecha a izquierda
+		if lines[height-1][col] == '+' || lines[height-1][col] == '*' { // si la ultima fila tiene una operacion
+			op = string(lines[height-1][col]) // se guarda la operacion
+			break // salimos del bucle
+		}
 	}
 
-	if len(numbers) == 0 || op == ""{ // si no se encontraron numeros o operaciones
+	// recorrer columnas de derecha a izquierda
+	for col := width -1; col >= 0; col-- {
+		numStr := "" // esta variable guarda el numero encontrado como string
+
+		// recorrer filas de arriba a abajo (sin la fila del operador)
+		for row := 0; row < height - 1; row++ {
+			ch := lines[row][col] // se obtiene el caracter en la posicion (row, col)
+			if ch >= '0' && ch <= '9' { // si el caracter es un digito
+				numStr += string(ch) // se agrega el caracter al numero como string
+			}
+		}
+
+		if numStr != "" { // si se encontro un numero
+			var n int // esta variable guarda el numero encontrado
+			fmt.Sscanf(numStr, "%d", &n) // se convierte el numero como string a numero usando Sscanf
+			numbers = append(numbers, n) // se agrega el numero a la lista de numeros
+		}
+	}
+
+	// aplicar operacion
+	if len(numbers) == 0 || op == "" { // si no se encontraron numeros o operaciones
 		return 0 // se devuelve 0
 	}
 
