@@ -6,6 +6,13 @@ import (
 	"os"
 )
 
+type resultadoRayo struct {
+	filaFinal int
+	colFinal int
+	razonFin string
+	salioMapa bool
+}
+
 func main() {
 	lines, width, err := readLines("input.txt")
 	if err != nil {
@@ -35,7 +42,12 @@ func main() {
 		return
 	}
 	
+	// iniciar simulacion de rayo desde la posicion S
 	SimularRayo(startRow+1, startCol, lines)
+
+	// imprimir resultados de la simulacion
+	resultado := SimularRayo(startRow+1, startCol, lines)
+	fmt.Printf("Rayo termina en fila %d, columna %d, razon: %s, salioMapa: %t\n", resultado.filaFinal, resultado.colFinal, resultado.razonFin, resultado.salioMapa)
 }
 
 // leer el input y guardarlo commo una matriz accesible por fila y columna
@@ -64,20 +76,59 @@ func readLines(path string) ([]string, int, error) { // leer todas las lineas, e
 	return lines, width, nil
 }
 
-func SimularRayo(row, col int, lines []string) {
+// "devolver resultados" = entregar datos, no imprimir texto, el rayo debe decir: donde termino, por que termino y si salio del mapa
+func SimularRayo(row, col int, lines []string) resultadoRayo {
 	height := len(lines)
 
-	for row < height {
-		char := lines[row][col]
-		if char == '.' {
-			row++
-			continue
-		} else if char == '^' {
-			fmt.Println("Rayo detenido en: ", row, col)
-			return
-		} else {
-			fmt.Println("Rayo detenido por simbolo: ", string(char), "en", row, col)
-			return
+	// Dirección inicial: hacia abajo
+	dFila, dCol := 1, 0
+
+	for {
+		// verificar si el rayo salió del mapa
+		if row < 0 || row >= height || col < 0 || col >= len(lines[row]) {
+			return resultadoRayo{
+				filaFinal: row,
+				colFinal:  col,
+				razonFin:  "Salio del mapa",
+				salioMapa: true,
+			}
+		}
+
+		celda := lines[row][col]
+
+		switch celda {
+		case ' ', 'S':
+			// continuar recto
+			row += dFila
+			col += dCol
+
+		case '/':
+			// reflejo /
+			dFila, dCol = -dCol, -dFila
+			row += dFila
+			col += dCol
+
+		case '\\':
+			// reflejo \
+			dFila, dCol = dCol, dFila
+			row += dFila
+			col += dCol
+
+		case 'E':
+			return resultadoRayo{
+				filaFinal: row,
+				colFinal:  col,
+				razonFin:  "Llego a la salida",
+				salioMapa: false,
+			}
+
+		default:
+			return resultadoRayo{
+				filaFinal: row,
+				colFinal:  col,
+				razonFin:  "Choco con un obstaculo",
+				salioMapa: false,
+			}
 		}
 	}
 }
